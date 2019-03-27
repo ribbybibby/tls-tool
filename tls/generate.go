@@ -8,13 +8,10 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
-	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
 	"math/big"
-	"net"
 	"strings"
-	"time"
 )
 
 // GenerateSerialNumber returns random bigint generated with crypto/rand
@@ -46,51 +43,6 @@ func GeneratePrivateKey() (crypto.Signer, string, error) {
 	}
 
 	return pk, buf.String(), nil
-}
-
-// GenerateCert generates a new certificate for agent TLS (not to be confused with Connect TLS)
-func GenerateCert(signer crypto.Signer, ca string, sn *big.Int, name string, days int, DNSNames []string, IPAddresses []net.IP, extKeyUsage []x509.ExtKeyUsage) (string, string, error) {
-	parent, err := ParseCert(ca)
-	if err != nil {
-		return "", "", err
-	}
-
-	signee, pk, err := GeneratePrivateKey()
-	if err != nil {
-		return "", "", err
-	}
-
-	id, err := KeyID(signee.Public())
-	if err != nil {
-		return "", "", err
-	}
-
-	template := x509.Certificate{
-		SerialNumber:          sn,
-		Subject:               pkix.Name{CommonName: name},
-		BasicConstraintsValid: true,
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
-		ExtKeyUsage:           extKeyUsage,
-		IsCA:                  false,
-		NotAfter:              time.Now().AddDate(0, 0, days),
-		NotBefore:             time.Now(),
-		SubjectKeyId:          id,
-		DNSNames:              DNSNames,
-		IPAddresses:           IPAddresses,
-	}
-
-	bs, err := x509.CreateCertificate(rand.Reader, &template, parent, signee.Public(), signer)
-	if err != nil {
-		return "", "", err
-	}
-
-	var buf bytes.Buffer
-	err = pem.Encode(&buf, &pem.Block{Type: "CERTIFICATE", Bytes: bs})
-	if err != nil {
-		return "", "", fmt.Errorf("error encoding private key: %s", err)
-	}
-
-	return buf.String(), pk, nil
 }
 
 // KeyId returns a x509 KeyId from the given signing key.
