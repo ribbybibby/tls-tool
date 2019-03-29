@@ -23,7 +23,6 @@ type Cert struct {
 	Domain       string
 	Days         int
 	Key          string
-	Server       bool
 	Client       bool
 	DNSNames     []string
 	signer       crypto.Signer
@@ -48,31 +47,16 @@ func (c *Cert) Create() (err error) {
 		return fmt.Errorf("Please provide the key")
 	}
 
-	if !((c.Server && !c.Client) || (!c.Server && c.Client)) {
-		return fmt.Errorf("Please provide either -server or -client")
-	}
-
 	for _, d := range c.DNSNames {
 		if len(d) > 0 {
 			c.dnsnames = append(c.dnsnames, strings.TrimSpace(d))
 		}
 	}
 
-	if c.Server {
-		c.name = fmt.Sprintf("server.%s", c.Domain)
-		c.dnsnames = append(c.dnsnames, []string{c.name, "localhost"}...)
-		c.ipaddresses = []net.IP{net.ParseIP("127.0.0.1")}
-		c.extKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth}
-		c.prefix = fmt.Sprintf("server-%s", c.Domain)
-	} else if c.Client {
-		c.name = fmt.Sprintf("client.%s", c.Domain)
-		c.dnsnames = append(c.dnsnames, []string{c.name, "localhost"}...)
-		c.ipaddresses = []net.IP{net.ParseIP("127.0.0.1")}
-		c.extKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}
-		c.prefix = fmt.Sprintf("client-%s", c.Domain)
-	} else {
-		return fmt.Errorf("Neither client, cli nor server - should not happen")
-	}
+	c.dnsnames = append(c.dnsnames, []string{c.name, "localhost"}...)
+	c.ipaddresses = []net.IP{net.ParseIP("127.0.0.1")}
+	c.extKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth}
+	c.prefix = fmt.Sprintf("cert-%s", c.Domain)
 
 	var pkFileName, certFileName string
 	max := 10000
@@ -152,7 +136,7 @@ func (c *Cert) generate() (err error) {
 
 	template := x509.Certificate{
 		SerialNumber:          c.serialNumber,
-		Subject:               pkix.Name{CommonName: c.name},
+		Subject:               pkix.Name{CommonName: c.Domain},
 		BasicConstraintsValid: true,
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage:           c.extKeyUsage,

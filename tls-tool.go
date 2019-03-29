@@ -28,11 +28,10 @@ var (
 
 	certCmd                      = app.Command("cert", "Certificates")
 	certCreate                   = certCmd.Command("create", "Create a new certificate")
-	certCreateType               = certCreate.Arg("type", "Server or client certificate").Required().Enum([]string{"server", "client"}...)
 	certCreateCAFile             = certCreate.Flag("ca", "Provide path to the ca").Default("ca.pem").ExistingFile()
 	certCreateKeyFile            = certCreate.Flag("key", "Provide path to the key").Default("ca-key.pem").ExistingFile()
 	certCreateDays               = certCreate.Flag("days", "Provide number of days the certificate is valid for from now on").Default("365").Int()
-	certCreateDomain             = certCreate.Flag("domain", "Domain").Default("ribbybibby.me").String()
+	certCreateDomain             = certCreate.Flag("domain", "Domain").Default("cert.ribbybibby.me").String()
 	certCreateAdditionalDNSnames = certCreate.Flag("additional-dnsname", "Provide an additional dnsname for Subject Alternative Names.").Strings()
 )
 
@@ -58,28 +57,12 @@ func main() {
 			log.Fatalf(err.Error())
 		}
 	case certCreate.FullCommand():
-		var server bool
-		var client bool
-
-		switch *certCreateType {
-		case "server":
-			server = true
-			client = false
-		case "client":
-			server = false
-			client = true
-		default:
-			server = false
-			client = true
-		}
 
 		c := &cert.Cert{
 			CA:       *certCreateCAFile,
 			Domain:   *certCreateDomain,
 			Days:     *certCreateDays,
 			Key:      *certCreateKeyFile,
-			Server:   server,
-			Client:   client,
 			DNSNames: *certCreateAdditionalDNSnames,
 		}
 		err := c.Create()
