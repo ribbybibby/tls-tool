@@ -16,36 +16,35 @@ Commands:
     Show help.
 
   ca create [<flags>]
-    Create a new CA
+    Create a new certificate authority
 
-  cert create [<flags>] <type>
+  cert create [<flags>]
     Create a new certificate
 ```
 ```
 $ tls-tool ca create --help
 usage: tls-tool ca create [<flags>]
 
-Create a new CA
+Create a new certificate authority
 
 Flags:
-  --help                         Show context-sensitive help (also try --help-long and --help-man).
-  --common-name="ribbybibby.me"  Common name
-  --domain="ribbybibby.me"       Domain
-  --days=1825                    Provide number of days the CA is valid for from now on
-  --name-constraint              Add name constraints for the CA.
+  --help                       Show context-sensitive help (also try --help-long and --help-man).
+  --domain="ribbybibby.me"     Domain
+  --days=1825                  Provide number of days the CA is valid for from now on
+  --name-constraint            Add name constraints for the CA?
   --additional-name-constraint=ADDITIONAL-NAME-CONSTRAINT ...  
-                                 Add name constraints for the CA.
-  --country="GB"                 Country
-  --postal-code="SW18XXX"        Postal code
-  --province="England"           Province
-  --locality="London"            Locality
+                               Add additional name constraints for the CA.
+  --country="GB"               Country
+  --postal-code="SW18XXX"      Postal code
+  --province="England"         Province
+  --locality="London"          Locality
   --street-address="123 Fake St"  
-                                 Street Address
-  --organization="ribbybibby"    Organization
+                               Street Address
+  --organization="ribbybibby"  Organization
 ```
 ```
 $ tls-tool cert create --help
-usage: tls-tool cert create [<flags>] <type>
+usage: tls-tool cert create [<flags>]
 
 Create a new certificate
 
@@ -56,10 +55,8 @@ Flags:
   --days=365                Provide number of days the certificate is valid for from now on
   --domain="ribbybibby.me"  Domain
   --additional-dnsname=ADDITIONAL-DNSNAME ...  
-                            Provide an additional dnsname for Subject Alternative Names.
-
-Args:
-  <type>  Server or client certificate
+                            Provide additional dnsnames for Subject Alternative Names.
+  --insecure                Optionally allow the creation of purposely expired or otherwise invalid certs
 ```
 
 ## Example
@@ -70,18 +67,10 @@ $ tls-tool ca create
 ==> Saved ca-key.pem
 ```
 
-Create a server certificate:
+Create a certificate:
 ```
 $ tls-tool cert create server
 ==> Using ca.pem and ca-key.pem
-==> Saved server-ribbybibby.me-0.pem
-==> Saved server-ribbybibby.me-0-key.pem
-```
-
-Create a client certificate:
-```
-$ tls-tool cert create client
-==> Using ca.pem and ca-key.pem
-==> Saved client-ribbybibby.me-0.pem
-==> Saved client-ribbybibby.me-0-key.pem
+==> Saved cert-ribbybibby.me-0.pem
+==> Saved cert-ribbybibby.me-0-key.pem
 ```
