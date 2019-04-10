@@ -69,7 +69,7 @@ $ tls-tool ca create
 
 Create a certificate:
 ```
-$ tls-tool cert create server
+$ tls-tool cert create
 ==> Using ca.pem and ca-key.pem
 ==> Saved cert-ribbybibby.me-0.pem
 ==> Saved cert-ribbybibby.me-0-key.pem
